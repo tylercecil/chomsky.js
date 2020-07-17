@@ -5,7 +5,9 @@
   "scripts": {
     "test": "jest",
     "build": "webpack-cli",
-    "watch": "webpack-cli -w"
+    "watch": "webpack-cli -w",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,10 @@
     "@types/jest": "^26.0.4",
     "@types/node": "^14.0.23",
     "@types/webpack": "^4.41.21",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
+    "eslint": "^7.4.0",
+    "eslint-loader": "^4.0.2",
     "jest": "^26.1.0",
     "ts-loader": "^8.0.1",
     "ts-node": "^8.10.2",
