@@ -11,8 +11,12 @@
     "type": "git",
     "url": "git+https://github.com/tylercecil/chomTree.git"
   },
-  "author": "Tyler Cecil",
-  "license": "ISC",
+  "author": "Tyler Cecil <tyler.i.cecil@gmail.com> (https://github.com/tylercecil)",
+  "contributors": [
+    "Tyler Cecil <tyler.i.cecil@gmail.com> (https://github.com/tylercecil)",
+    "Duncan Gibbs <duncgibbs@gmail.com> (https://github.com/duncgibbs)"
+  ],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tylercecil/chomTree/issues"
   },
