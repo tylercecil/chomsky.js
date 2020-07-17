@@ -1,0 +1,32 @@
+{
+  "name": "chomtree",
+  "version": "1.0.0",
+  "description": "Linguistic syntax tree markup",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack-cli",
+    "watch": "webpack-cli -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylercecil/chomTree.git"
+  },
+  "author": "Tyler Cecil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tylercecil/chomTree/issues"
+  },
+  "homepage": "https://github.com/tylercecil/chomTree#readme",
+  "devDependencies": {
+    "@babel/core": "^7.10.5",
+    "@types/jest": "^26.0.4",
+    "@types/node": "^14.0.23",
+    "@types/webpack": "^4.41.21",
+    "jest": "^26.1.0",
+    "ts-loader": "^8.0.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  }
+}
