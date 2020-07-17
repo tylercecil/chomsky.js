@@ -14,7 +14,7 @@ nodes contain further words, representing the leaf data.
 ### Multi-Word Nodes
 
 ```
-[NP [D the] [AdjP [Adj big] [Adj red]] [N dog]]
+[NP [D the] [N ice cream truck]]
 ```
 
 Leaf nodes may contain multiple words.
@@ -25,7 +25,8 @@ Leaf nodes may contain multiple words.
 [NP [D the] [AdjP.Adj big] [N dog]]
 ```
 
-For chains of non branching nodes, a `.` may be placed between node types.
+For chains of non branching nodes, a `.` may be placed between node types. This
+is equivelant to `[NP [D the] [AdjP [Adj big]] [N dog]]`.
 
 ### Collapsed Tree
 
@@ -39,11 +40,11 @@ To mark an unknown subtree, an `*` is used.
 
 ```
 [VP [V gave] [NP_1.N her] [NP_2.N it]]
-[VP [V gave] [NP_1.N her] [NP_2.N it]]
+[VP [V gave] [NP^1.N her] [NP^2.N it]]
 ```
 
 Node types may have subscripts and superscripts denoted with `_` and `^`
-respectively.
+respectively. Currently only node types may have scripts.
 
 ### Null Content
 
@@ -51,7 +52,7 @@ respectively.
 [TP [VP* ...] [T /] [NP* ...]
 ```
 
-If a node's data should be ∅, a `/` may be used.
+If a node's data should be "∅", a `/` may be used.
 
 ### Empty Node
 
@@ -71,13 +72,19 @@ Leaf nodes need not contain data.
 
 ## EBNF
 
+Whitespace tokens are ignored, with the exception of the NodeData section,
+where they are preserved.
+
+A `word` is any unicode string not containing a symbol used elsewhere in the
+grammar or whitespace.
+
 ```
-Node      := "[" Node_T {"." Node_T} ( NodeList | NodeData ) "].
-Node_T    := word [(sub [sup]) | (sup [sub])].
-NodeList  := { Node | EmptyNode }.
-EmptyNode := "[" "]".
-NodeData  := ( ["*"] word {word} | Null ).
-sub       := "_" word.
-sup       := "^" word.
-Null      := "/".
+Node     := "[" "]" | "[" Node_T {"." Node_T} ( NodeList | NodeData ) "]".
+Node_T   := word [(sub [sup]) | (sup [sub])].
+NodeList := { Node }.
+NodeData := ( ["*"] word {word | DataSymbols} | Null ).
+sub      := "_" word.
+sup      := "^" word.
+Null     := "/".
+DataSymbols := "." | "*" | "/" | "_" | "^".
 ```
