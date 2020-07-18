@@ -1,5 +1,5 @@
-describe('overall test suite component', () => {
-    test('specific test', () => {
-        expect(true);
-    });
+describe("overall test suite component", () => {
+  test("specific test", () => {
+    expect(true);
+  });
 });
