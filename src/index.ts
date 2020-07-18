@@ -1,1 +1,1 @@
-console.log("Duncan rules. Tyler drools.");
+console.log('Duncan rules. Tyler drools.');
