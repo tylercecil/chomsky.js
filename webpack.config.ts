@@ -1,4 +1,4 @@
-const path = require('path');
+import path = require('path');
 
 module.exports = {
   entry: './src/index.ts',
@@ -8,13 +8,13 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
         exclude: /node_modules/,
+        use: ['ts-loader'],
       },
     ],
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ],
+    extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
     filename: 'bundle.js',
