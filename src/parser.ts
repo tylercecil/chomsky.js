@@ -1,7 +1,7 @@
-interface Token {
-  type: string;
-  value?: string;
-}
+// interface Token {
+//  type: string;
+//  value?: string;
+//}
 
 function* tokenizer(input) {
   const whitespace = /\s/;
@@ -21,7 +21,7 @@ function* tokenizer(input) {
       yield tok;
     } else {
       const tok = { type: 'WORD', value: '' };
-      while (!symbols.test(input[cur]) && !whitespace.test(input[cur])) {
+      while (cur < input.length && !symbols.test(input[cur]) && !whitespace.test(input[cur])) {
         tok.value = tok.value.concat(input[cur]);
         cur++;
       }
@@ -29,3 +29,5 @@ function* tokenizer(input) {
     }
   }
 }
+
+export { tokenizer };
