@@ -1,9 +1,9 @@
-// interface Token {
-//  type: string;
-//  value?: string;
-//}
+interface Token {
+  type: string;
+  value?: string;
+}
 
-function* tokenizer(input) {
+function* tokenizer(input : String) : Generator<Token, Token, void> {
   const whitespace = /\s/;
   const symbols = /[.*/_^[\]]/;
   let cur = 0;
@@ -32,6 +32,8 @@ function* tokenizer(input) {
       yield tok;
     }
   }
+
+  return { type: 'EOF' }
 }
 
 export { tokenizer };
