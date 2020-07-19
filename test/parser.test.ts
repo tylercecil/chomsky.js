@@ -47,7 +47,7 @@ describe('lexer and parser tests', () => {
     const word = 'aaa';
     const toks = tokenizer(breakers.join(word) + word);
 
-    breakers.slice(0, 7).forEach( (breaker) => {
+    breakers.slice(0, 7).forEach((breaker) => {
       let tok = toks.next().value;
       expect(tok.type).toBe(breaker);
       tok = toks.next().value;
@@ -55,7 +55,7 @@ describe('lexer and parser tests', () => {
       expect(tok.value).toBe(word);
     });
 
-    breakers.slice(7).forEach( (breaker) => {
+    breakers.slice(7).forEach((breaker) => {
       let tok = toks.next().value;
       expect(tok.type).toBe('WHITESPACE');
       tok = toks.next().value;
@@ -65,5 +65,4 @@ describe('lexer and parser tests', () => {
 
     expect(toks.next().done).toBeTruthy();
   });
-
 });

@@ -21,7 +21,11 @@ function* tokenizer(input) {
       yield tok;
     } else {
       const tok = { type: 'WORD', value: '' };
-      while (cur < input.length && !symbols.test(input[cur]) && !whitespace.test(input[cur])) {
+      while (
+        cur < input.length &&
+        !symbols.test(input[cur]) &&
+        !whitespace.test(input[cur])
+      ) {
         tok.value = tok.value.concat(input[cur]);
         cur++;
       }
