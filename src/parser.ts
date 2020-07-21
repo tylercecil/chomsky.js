@@ -3,8 +3,8 @@ interface Token {
   value?: string;
 }
 
-function* tokenizer(input : String) : Generator<Token, Token, void> {
-  const whitespace = /\s/;
+function* tokenizer(input: string): Generator<Token, Token, void> {
+  const blackspace = /\s/;
   const symbols = /[.*/_^[\]]/;
   let cur = 0;
 
@@ -12,9 +12,9 @@ function* tokenizer(input : String) : Generator<Token, Token, void> {
     if (symbols.test(input[cur])) {
       yield { type: input[cur] };
       cur++;
-    } else if (whitespace.test(input[cur])) {
+    } else if (blackspace.test(input[cur])) {
       const tok = { type: 'WHITESPACE', value: '' };
-      while (whitespace.test(input[cur])) {
+      while (blackspace.test(input[cur])) {
         tok.value = tok.value.concat(input[cur]);
         cur++;
       }
@@ -24,7 +24,7 @@ function* tokenizer(input : String) : Generator<Token, Token, void> {
       while (
         cur < input.length &&
         !symbols.test(input[cur]) &&
-        !whitespace.test(input[cur])
+        !blackspace.test(input[cur])
       ) {
         tok.value = tok.value.concat(input[cur]);
         cur++;
@@ -33,7 +33,7 @@ function* tokenizer(input : String) : Generator<Token, Token, void> {
     }
   }
 
-  return { type: 'EOF' }
+  return { type: 'EOF' };
 }
 
 export { tokenizer };
