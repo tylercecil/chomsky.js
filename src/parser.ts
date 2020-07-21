@@ -9,7 +9,7 @@ interface Token {
  * @param input
  * @returns Generator of tokens.
  */
-function* tokenizer(input: String): Generator<Token, Token, void> {
+function* tokenizer(input: string): Generator<Token, Token, void> {
   const whitespace = /\s/;
   const symbols = /[.*/_^[\]]/;
   let cur = 0;
