@@ -1,15 +1,19 @@
-interface Token {
-  type: string;
+type Token = {
+  kind: TokenKind;
   value?: string;
-}
+};
 
-interface Tree {
-  nType: { name: string; sup: string; sub: string };
-  isCollapsed: boolean;
-  nClass: string;
-  children: [];
-  data: string;
-}
+type TokenKind =
+  | '.'
+  | '*'
+  | '/'
+  | '_'
+  | '^'
+  | '['
+  | ']'
+  | 'WORD'
+  | 'WHITESPACE'
+  | 'EOF';
 
 /**
  * Parses a given string, returning a Tree object.
@@ -28,7 +32,7 @@ function parse(input: string) {
 
   function accept_ws(tokenType = 'WHITESPACE') {
     let tok = null;
-    if (tok_peek.type === tokenType) {
+    if (tok_peek.kind === tokenType) {
       tok = tok_peek;
       tok_peek = toks.next().value;
     }
@@ -38,7 +42,7 @@ function parse(input: string) {
   function expect(tokenType: string) {
     const tok = accept(tokenType);
     if (!tok) {
-      throw 'Unexpected token!: ' + tok_peek.type;
+      throw 'Unexpected token!: ' + tok_peek.kind;
     }
     return tok;
   }
@@ -46,14 +50,14 @@ function parse(input: string) {
   function node() {
     expect('[');
     accept_ws();
-    if (tok_peek.type == 'WORD') {
+    if (tok_peek.kind == 'WORD') {
       nodeType();
       while (accept('.')) {
         nodeType();
       }
 
       // + '' is to make typescript be quite...
-      switch (tok_peek.type + '') {
+      switch (tok_peek.kind + '') {
         case '[':
           nodeList();
           break;
@@ -89,7 +93,7 @@ function parse(input: string) {
 
   function nodeList() {
     accept_ws();
-    while (tok_peek.type === '[') {
+    while (tok_peek.kind === '[') {
       node();
       accept_ws();
     }
@@ -102,9 +106,9 @@ function parse(input: string) {
       accept('*');
       expect('WORD');
       while (
-        tok_peek.type != '[' &&
-        tok_peek.type != ']' &&
-        tok_peek.type != 'EOF'
+        tok_peek.kind != '[' &&
+        tok_peek.kind != ']' &&
+        tok_peek.kind != 'EOF'
       ) {
         tok_peek = toks.next().value;
       }
@@ -127,17 +131,17 @@ function* tokenize(input: string): Generator<Token, Token, void> {
 
   while (cur < input.length) {
     if (symbols.test(input[cur])) {
-      yield { type: input[cur] };
+      yield { kind: input[cur] as TokenKind };
       cur++;
     } else if (whitespace.test(input[cur])) {
-      const tok = { type: 'WHITESPACE', value: '' };
+      const tok = { kind: 'WHITESPACE' as const, value: '' };
       while (whitespace.test(input[cur])) {
         tok.value = tok.value.concat(input[cur]);
         cur++;
       }
       yield tok;
     } else {
-      const tok = { type: 'WORD', value: '' };
+      const tok = { kind: 'WORD' as const, value: '' };
       while (
         cur < input.length &&
         !symbols.test(input[cur]) &&
@@ -150,7 +154,7 @@ function* tokenize(input: string): Generator<Token, Token, void> {
     }
   }
 
-  return { type: 'EOF' };
+  return { kind: 'EOF' as const };
 }
 
 export { tokenize };

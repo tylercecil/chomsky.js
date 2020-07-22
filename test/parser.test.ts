@@ -6,7 +6,7 @@ describe('lexer and parser tests', () => {
     const toks = tokenize(symbols.join(''));
 
     symbols.forEach((sym) => {
-      expect(toks.next().value.type).toBe(sym);
+      expect(toks.next().value.kind).toBe(sym);
     });
 
     expect(toks.next().done).toBeTruthy();
@@ -18,10 +18,10 @@ describe('lexer and parser tests', () => {
 
     spaces.forEach((space) => {
       let tok = toks.next().value;
-      expect(tok.type).toBe('WHITESPACE');
+      expect(tok.kind).toBe('WHITESPACE');
       expect(tok.value).toBe(space);
       tok = toks.next().value;
-      expect(tok.type).toBe('.');
+      expect(tok.kind).toBe('.');
     });
 
     expect(toks.next().done).toBeTruthy();
@@ -33,10 +33,10 @@ describe('lexer and parser tests', () => {
 
     words.forEach((word) => {
       let tok = toks.next().value;
-      expect(tok.type).toBe('WORD');
+      expect(tok.kind).toBe('WORD');
       expect(tok.value).toBe(word);
       tok = toks.next().value;
-      expect(tok.type).toBe('WHITESPACE');
+      expect(tok.kind).toBe('WHITESPACE');
     });
 
     expect(toks.next().done).toBeTruthy();
@@ -49,17 +49,17 @@ describe('lexer and parser tests', () => {
 
     breakers.slice(0, 7).forEach((breaker) => {
       let tok = toks.next().value;
-      expect(tok.type).toBe(breaker);
+      expect(tok.kind).toBe(breaker);
       tok = toks.next().value;
-      expect(tok.type).toBe('WORD');
+      expect(tok.kind).toBe('WORD');
       expect(tok.value).toBe(word);
     });
 
     breakers.slice(7).forEach((breaker) => {
       let tok = toks.next().value;
-      expect(tok.type).toBe('WHITESPACE');
+      expect(tok.kind).toBe('WHITESPACE');
       tok = toks.next().value;
-      expect(tok.type).toBe('WORD');
+      expect(tok.kind).toBe('WORD');
       expect(tok.value).toBe(word);
     });
 
