@@ -1,9 +1,9 @@
-import { tokenizer } from '../src/parser.ts';
+import { tokenize, parse } from '../src/parser.ts';
 
-describe('lexer and parser tests', () => {
-  test('lexer tokenizes symbols', () => {
+describe('tokenize (lexer)', () => {
+  test('tokenizes symbols', () => {
     const symbols = ['.', '*', '/', '_', '^', '[', ']'];
-    const toks = tokenizer(symbols.join(''));
+    const toks = tokenize(symbols.join(''));
 
     symbols.forEach((sym) => {
       expect(toks.next().value.kind).toBe(sym);
@@ -12,9 +12,9 @@ describe('lexer and parser tests', () => {
     expect(toks.next().done).toBeTruthy();
   });
 
-  test('lexer tokenizes whitespace as whole tokens', () => {
+  test('tokenizes whitespace as whole tokens', () => {
     const spaces = [' ', '   ', '\n\n', '\t\n ', '\t\n   '];
-    const toks = tokenizer(spaces.join('.') + '.');
+    const toks = tokenize(spaces.join('.') + '.');
 
     spaces.forEach((space) => {
       let tok = toks.next().value;
@@ -27,9 +27,9 @@ describe('lexer and parser tests', () => {
     expect(toks.next().done).toBeTruthy();
   });
 
-  test('lexer tokenizes words as whole tokens', () => {
+  test('tokenizes words as whole tokens', () => {
     const words = ['a', 'aa', 'aaa'];
-    const toks = tokenizer(words.join(' ') + ' ');
+    const toks = tokenize(words.join(' ') + ' ');
 
     words.forEach((word) => {
       let tok = toks.next().value;
@@ -42,10 +42,10 @@ describe('lexer and parser tests', () => {
     expect(toks.next().done).toBeTruthy();
   });
 
-  test('lexer breaks words on whitespace and symbols', () => {
+  test('breaks words on whitespace and symbols', () => {
     const breakers = ['.', '*', '/', '_', '^', '[', ']', ' ', '\t', '\n'];
     const word = 'aaa';
-    const toks = tokenizer(breakers.join(word) + word);
+    const toks = tokenize(breakers.join(word) + word);
 
     breakers.slice(0, 7).forEach((breaker) => {
       let tok = toks.next().value;
@@ -64,5 +64,44 @@ describe('lexer and parser tests', () => {
     });
 
     expect(toks.next().done).toBeTruthy();
+  });
+});
+
+describe('parse', () => {
+  test.each(
+    // prettier-ignore
+    ['[]',
+     '[X]',
+     '[X.X]',
+     '[X_1^2]',
+     '[X^2.X_1]',
+     '[X data]',
+     '  [  X  data  ]   ',
+     '[X [X data] [Y data]]',
+     '[X * this is data.]',
+     '[XX.YY.ZZ* more data]',
+     '[XX /]',
+     '[X [XX [] [Y [Z data] ] ] [] ]',
+     '[X this_data ^ has./punct* ]',
+     '[X*X.X looks incorect, but is valid]',
+    ]
+  )("accepts the string '%s'", (str) => {
+    expect(() => parse(str)).not.toThrow();
+  });
+
+  test.each(
+    // prettier-ignore
+    ['[',
+     '[[]',
+     '[]]',
+     'X[]',
+     '[X.]',
+     '[X X []]',
+     '[X [] X]',
+     '[X /this_data ^starts with.punct* ]',
+     '[/ data]'
+    ]
+  )("rejects the string '%s'", (str) => {
+    expect(() => parse(str)).toThrow();
   });
 });
