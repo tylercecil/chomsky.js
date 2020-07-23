@@ -1,4 +1,4 @@
-import { tokenize, parse } from '../src/parser.ts';
+import { tokenize, parse } from '../src/parser';
 
 describe('tokenize (lexer)', () => {
   test('tokenizes symbols', () => {
@@ -71,19 +71,19 @@ describe('parse', () => {
   test.each(
     // prettier-ignore
     ['[]',
-     '[X]',
-     '[X.X]',
-     '[X_1^2]',
-     '[X^2.X_1]',
-     '[X data]',
-     '  [  X  data  ]   ',
-     '[X [X data] [Y data]]',
-     '[X * this is data.]',
-     '[XX.YY.ZZ* more data]',
-     '[XX /]',
-     '[X [XX [] [Y [Z data] ] ] [] ]',
-     '[X this_data ^ has./punct* ]',
-     '[X*X.X looks incorect, but is valid]',
+      '[X]',
+      '[X.X]',
+      '[X_1^2]',
+      '[X^2.X_1]',
+      '[X data]',
+      '  [  X  data  ]   ',
+      '[X [X data] [Y data]]',
+      '[X * this is data.]',
+      '[XX.YY.ZZ* more data]',
+      '[XX /]',
+      '[X [XX [] [Y [Z data] ] ] [] ]',
+      '[X this_data ^ has./punct* ]',
+      '[X*X.X looks incorect, but is valid]',
     ]
   )("accepts the string '%s'", (str) => {
     expect(() => parse(str)).not.toThrow();
@@ -92,16 +92,24 @@ describe('parse', () => {
   test.each(
     // prettier-ignore
     ['[',
-     '[[]',
-     '[]]',
-     'X[]',
-     '[X.]',
-     '[X X []]',
-     '[X [] X]',
-     '[X /this_data ^starts with.punct* ]',
-     '[/ data]'
+      '[[]',
+      '[]]',
+      'X[]',
+      '[X.]',
+      '[X X []]',
+      '[X [] X]',
+      '[X /this_data ^starts with.punct* ]',
+      '[/ data]'
     ]
   )("rejects the string '%s'", (str) => {
     expect(() => parse(str)).toThrow();
+  });
+
+  test.each(
+    // prettier-ignore
+    [['[]', { children: [] }],
+    ]
+  )('', (str, ast) => {
+    expect(parse(str)).toEqual(ast);
   });
 });
