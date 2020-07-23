@@ -16,6 +16,43 @@ type TokenKind =
   | 'EOF';
 
 /**
+ * AST representation of a tree after parsing, including all data and metadata
+ * nodes will need for rendering.
+ */
+type Tree = {
+  /**
+   * Node types are triples, incuding the base name, as well as possible
+   * subscripts and superscripts. A node with no `nodeType.name` is an empty
+   * node (not to be confused with a ∅-node).
+   */
+  nodeType: { name?: string; sup?: string; sub?: string };
+  /**
+   * The name `children` has special meaning for `d3.hierarchy`.
+   */
+  children: Tree[];
+  /**
+   * Marks whether or not to render with a "hidden tree".
+   */
+  isCollapsed: boolean;
+  /**
+   * Leaf nodes contain data strings.
+   */
+  data?: string;
+  /**
+   * Optionally, nodes may have classes associated with them, allowing for
+   * custom user CSS.
+   */
+  classes?: string[];
+};
+
+/**
+ * Constructor for `Tree` type.
+ */
+function Tree() {
+  return { nodeType: {}, children: [], isCollapsed: false };
+}
+
+/**
  * Returns generator, producing tokens from an input string to be parsed.
  *
  * @param input
