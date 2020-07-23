@@ -16,37 +16,6 @@ type TokenKind =
   | 'EOF';
 
 /**
- * AST representation of a tree after parsing, including all data and metadata
- * nodes will need for rendering.
- */
-type Tree = {
-  /**
-   * Node types are triples, including the base name, as well as possible
-   * subscripts and superscripts. A node with no `nodeType` is an empty
-   * node (not to be confused with a ∅-node).
-   */
-  nodeType?: { name: string; sup: string; sub: string };
-  /**
-   * The name `children` has special meaning for `d3.hierarchy`.
-   */
-  children: Tree[];
-  /**
-   * Leaf nodes contain data strings. Additionally, they may mark if they were
-   * collapsed, denoting a "hidden subtree".
-   */
-  leaf?: { data: string; isCollapsed: boolean };
-  /**
-   * Optionally, nodes may have classes associated with them, allowing for
-   * custom user CSS.
-   */
-  classes?: string[];
-};
-
-function Tree(): Tree {
-  return { children: [] };
-}
-
-/**
  * Parses a given string, returning a Tree object.
  *
  * @param input
