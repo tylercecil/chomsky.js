@@ -1,3 +1,5 @@
+import { Tree } from './tree';
+
 type Token = {
   kind: TokenKind;
   value?: string;

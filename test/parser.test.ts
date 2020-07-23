@@ -1,4 +1,5 @@
 import { tokenize, parse } from '../src/parser';
+import { Tree, TreeBuilder } from '../src/tree';
 
 describe('tokenize (lexer)', () => {
   test('tokenizes symbols', () => {
@@ -99,17 +100,49 @@ describe('parse', () => {
       '[X X []]',
       '[X [] X]',
       '[X /this_data ^starts with.punct* ]',
-      '[/ data]'
+      '[/ data]',
+      '[X *]',
+      '[X* /]'
     ]
   )("rejects the string '%s'", (str) => {
     expect(() => parse(str)).toThrow();
   });
 
+  function T(name?: string) {
+    let tb = new TreeBuilder();
+    if (name) {
+      tb = tb.name(name);
+    }
+    return tb;
+  }
+
   test.each(
     // prettier-ignore
-    [['[]', { children: [] }],
+    [['[]', T() ],
+     ['[X]', T('X') ],
+     ['[X.X]', T('X').add( T('X'))],
+     ['[X_1^2]', T('X').sub('1').sup('2')],
+     ['[X^2.X_1]', T('X').sup('2').add(T('X').sub('1'))],
+     ['[X data]', T('X').data('data')],
+     ['[X [] []]', T('X').add(T(), T())],
+     ['[X [Y] [Z]]', T('X').add(T('Y'), T('Z'))],
+     ['[X* data]', T('X').data('data').collapse()],
+     ['[X this_data ^ has./punct* ]',
+      T('X').data('this_data ^ has./punct* ')],
+     ['[X       data]', T('X').data('data')],
+     ['[X data    data]', T('X').data('data    data')],
+     ['[X data  ]', T('X').data('data  ')],
+     ['[X /]', T('X').data('∅')],
+     ['[X [XX [] [Y [Z data] ] ] [] ]',
+      T('X').add(
+        T('XX').add(
+          T(),
+          T('Y').add(
+            T('Z').data('data'))),
+        T())],
+     ['[X*X.X data]', T('X').data('X.X data').collapse()]
     ]
-  )('', (str, ast) => {
-    expect(parse(str)).toEqual(ast);
+  )('correctly builds Tree from "%s"', (str, tree) => {
+    expect(parse(str)).toEqual(tree.build());
   });
 });
