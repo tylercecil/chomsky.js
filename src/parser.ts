@@ -25,6 +25,11 @@ function parse(input: string) {
   const toks = tokenize(input);
   let tok_peek = toks.next().value;
 
+  const root = node();
+  accept_ws();
+  expect('EOF');
+  return root;
+
   function accept(tokenType: string) {
     accept_ws();
     return accept_ws(tokenType);
@@ -57,7 +62,7 @@ function parse(input: string) {
       }
 
       // + '' is to make typescript be quite...
-      switch (tok_peek.kind + '') {
+      switch (tok_peek.kind as TokenKind) {
         case '[':
           nodeList();
           break;
@@ -114,8 +119,6 @@ function parse(input: string) {
       }
     }
   }
-
-  return undefined;
 }
 
 /**
@@ -157,4 +160,4 @@ function* tokenize(input: string): Generator<Token, Token, void> {
   return { kind: 'EOF' as const };
 }
 
-export { tokenize };
+export { tokenize, parse };
