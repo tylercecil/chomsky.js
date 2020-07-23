@@ -58,7 +58,7 @@ function Tree() {
  * @param input
  * @returns Resulting tree.
  */
-function parse(input: string) {
+function parse(input: string): Tree {
   const toks = tokenize(input);
   let tok_peek = toks.next().value;
 
@@ -90,18 +90,24 @@ function parse(input: string) {
   }
 
   function node() {
+    const root = Tree();
+    let head = root;
+
     expect('[');
     accept_ws();
     if (tok_peek.kind == 'WORD') {
-      nodeType();
+      root.nodeType = nodeType();
       while (accept('.')) {
-        nodeType();
+        const newHead = Tree();
+        head.children.push(newHead);
+        newHead.nodeType = nodeType();
+        head = newHead;
       }
 
       // + '' is to make typescript be quite...
       switch (tok_peek.kind as TokenKind) {
         case '[':
-          nodeList();
+          head.children = nodeList();
           break;
         case '*':
         case '.':
@@ -109,52 +115,69 @@ function parse(input: string) {
         case '_':
         case '^':
         case 'WORD':
-          nodeData();
+          head.leaf = nodeData();
           break;
       }
     }
 
     expect(']');
+
+    return root;
   }
 
   function nodeType() {
-    expect('WORD');
+    const nt = { name: '', sub: '', sup: '' };
+    nt.name = expect('WORD').value as string;
 
     if (accept('_')) {
-      expect('WORD');
+      nt.sub = expect('WORD').value as string;
       if (accept('^')) {
-        expect('WORD');
+        nt.sup = expect('WORD').value as string;
       }
     } else if (accept('^')) {
-      expect('WORD');
+      nt.sup = expect('WORD').value as string;
       if (accept('_')) {
-        expect('WORD');
+        nt.sub = expect('WORD').value as string;
       }
     }
+
+    return nt;
   }
 
   function nodeList() {
+    const nodes = [];
+
     accept_ws();
     while (tok_peek.kind === '[') {
-      node();
+      nodes.push(node());
       accept_ws();
     }
+
+    return nodes;
   }
 
   function nodeData() {
+    let data = '';
+    let collapsed = false;
+
     if (accept('/')) {
-      // Not empty
+      data = '∅';
     } else {
-      accept('*');
-      expect('WORD');
+      if (accept('*')) {
+        collapsed = true;
+      }
+      data += expect('WORD').value;
       while (
         tok_peek.kind != '[' &&
         tok_peek.kind != ']' &&
         tok_peek.kind != 'EOF'
       ) {
+        data += tok_peek.value ? tok_peek.value : tok_peek.kind;
         tok_peek = toks.next().value;
       }
     }
+
+    return { data: data, isCollapsed: collapsed };
   }
 }
 
