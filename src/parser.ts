@@ -21,23 +21,20 @@ type TokenKind =
  */
 type Tree = {
   /**
-   * Node types are triples, incuding the base name, as well as possible
-   * subscripts and superscripts. A node with no `nodeType.name` is an empty
+   * Node types are triples, including the base name, as well as possible
+   * subscripts and superscripts. A node with no `nodeType` is an empty
    * node (not to be confused with a ∅-node).
    */
-  nodeType: { name?: string; sup?: string; sub?: string };
+  nodeType?: { name: string; sup: string; sub: string };
   /**
    * The name `children` has special meaning for `d3.hierarchy`.
    */
   children: Tree[];
   /**
-   * Marks whether or not to render with a "hidden tree".
+   * Leaf nodes contain data strings. Additionally, they may mark if they were
+   * collapsed, denoting a "hidden subtree".
    */
-  isCollapsed: boolean;
-  /**
-   * Leaf nodes contain data strings.
-   */
-  data?: string;
+  leaf?: { data: string; isCollapsed: boolean };
   /**
    * Optionally, nodes may have classes associated with them, allowing for
    * custom user CSS.
@@ -45,11 +42,8 @@ type Tree = {
   classes?: string[];
 };
 
-/**
- * Constructor for `Tree` type.
- */
-function Tree() {
-  return { nodeType: {}, children: [], isCollapsed: false };
+function Tree(): Tree {
+  return { children: [] };
 }
 
 /**
