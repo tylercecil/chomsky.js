@@ -23,7 +23,7 @@ type TokenKind =
  * @param input
  * @returns Resulting tree.
  */
-function parse(input: string): Tree {
+function parse(input: string) {
   const toks = tokenize(input);
   let tok_peek = toks.next().value;
 
