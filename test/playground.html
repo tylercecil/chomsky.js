@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> ChomTree Playground </title>
+    <style>
+    </style>
+    <script src="../dist/bundle.js"></script>
+    <script>
+      function run() {
+        let val = chomTree.select('#input textarea').text();
+        let res = ''
+
+        console.log('Running Renderer...')
+        console.log(val)
+        try {
+          res = chomTree.parse(val);
+        } catch(err) {
+          res = err;
+        }
+        console.log('res =')
+        console.log(res)
+
+        chomTree.select('#output').text(JSON.stringify(res, undefined, 2));
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="input">
+      <textarea>[X.X]</textarea>
+      <br>
+      <button id="render" type="button" onclick="run()"> Render </button>
+    </div>
+
+    <div id="output">
+
+    </div>
+  </body>
+</html>
