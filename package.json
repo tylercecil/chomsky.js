@@ -49,8 +49,10 @@
     "singleQuote": true
   },
   "dependencies": {
+    "@types/d3-hierarchy": "^1.1.6",
     "@types/d3-selection": "^1.4.2",
     "d3-flextree": "^2.1.1",
+    "d3-hierarchy": "^1.1.9",
     "d3-selection": "^1.4.2"
   }
 }

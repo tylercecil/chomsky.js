@@ -1,2 +1,3 @@
-export { parse } from '../src/parser';
+export { parse } from './parser';
+export { render } from './render';
 export { select } from 'd3-selection';

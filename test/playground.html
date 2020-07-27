@@ -7,20 +7,16 @@
     <script src="../dist/bundle.js"></script>
     <script>
       function run() {
-        let val = chomTree.select('#input textarea').text();
-        let res = ''
-
-        console.log('Running Renderer...')
-        console.log(val)
+        const val = chomTree.select('#input textarea').node().value
+        const out = chomTree.select('#output');
         try {
-          res = chomTree.parse(val);
+          console.log(val);
+          const root = chomTree.parse(val);
+          console.log(root);
+          chomTree.render(root, out);
         } catch(err) {
-          res = err;
+          out.text(err);
         }
-        console.log('res =')
-        console.log(res)
-
-        chomTree.select('#output').text(JSON.stringify(res, undefined, 2));
       }
     </script>
   </head>
@@ -32,8 +28,7 @@
       <button id="render" type="button" onclick="run()"> Render </button>
     </div>
 
-    <div id="output">
-
+    <div id="output" style="max-width: 600px; margin: auto;">
     </div>
   </body>
 </html>
