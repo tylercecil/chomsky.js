@@ -1,10 +1,14 @@
 import { Tree } from './tree';
 import { Selection } from 'd3-selection';
-import { hierarchy, tree as d3tree, HierarchyPointNode } from 'd3-hierarchy';
+import { flextree, FlexHierarchy } from 'd3-flextree';
 
 type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
 type SVG = Selection<SVGSVGElement, string, HTMLElement, undefined>;
-type TreeData = HierarchyPointNode<Tree>;
+type TreeData = FlexHierarchy<Tree>;
+
+// NOTE: We will set em to 1 in the svg coords.That means, if we want the SVG to
+// have a max-size based on the surrounding div, we need to set max-width to
+// viewBox-width * parent.em.
 
 /**
  * Bundles together settings and options used for rendering a tree.
@@ -36,8 +40,8 @@ const config = {
  * @param {Selection} div `<div>` to be associated with `tree`.
  */
 export function render(tree: Tree, div: Div) {
-  const root: TreeData = hierarchy(tree) as TreeData;
-  const layout = d3tree().nodeSize([1, 1]);
+  const layout = flextree().nodeSize([1, 1]);
+  const root = layout.hierarchy(tree) as TreeData;
   layout(root);
 
   div.html('');
