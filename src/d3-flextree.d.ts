@@ -3,12 +3,14 @@ declare module 'd3-flextree' {
 
   export interface FlexHierarchy<Datum> extends HierarchyPointNode<Datum> {
     /**
-     * The computed x-coordinate of the node position.
+     * The computed x-coordinate of the node position. This is the center x
+     * position, between `left` and `right`.
      */
     x: number;
 
     /**
-     * The computed y-coordinate of the node position.
+     * The computed y-coordinate of the node position This is the top y
+     * position, equal to `top`.
      */
     y: number;
 
@@ -22,28 +24,49 @@ declare module 'd3-flextree' {
     noChildren: boolean;
 
     /**
-     * number of nodes in this subtree
+     * The number of nodes in this subtree.
      */
     length: number;
 
     /**
-     * size of this node (the values fetched by the nodeSize accessor) as a
+     * The size of this node (the values fetched by the nodeSize accessor) as a
      * two-element array.
      */
     size: [number, number];
 
     xSize: number;
     ySize: number;
+
+    /**
+     * Equal to `y`.
+     */
     top: number;
+
+    /**
+     * Equal to `y + ySize`.
+     */
     bottom: number;
+
+    /**
+     * Equal to `x - xSize / 2`
+     */
     left: number;
+
+    /**
+     * Equal to `x + xSize / 2`.
+     */
     right: number;
 
     /**
-     * the minimum top and left, and the maximum bottom and right values for all
-     * of the nodes in this subtree
+     * The minimum top and left, and the maximum bottom and right values for all
+     * of the nodes in this subtree.
      */
-    extents: [number, number, number, number];
+    extents: {
+      bottom: number;
+      left: number;
+      right: number;
+      top: number;
+    };
   }
 
   export interface FlexTreeLayout<Datum> extends TreeLayout<Datum> {
@@ -69,6 +92,19 @@ declare module 'd3-flextree' {
      * @param size The specified two-element size array.
      */
     nodeSize(f: (d: FlexHierarchy<Datum>) => [number, number]): this;
+
+    /**
+     * If a spacing argument is given as a constant number, then the layout will
+     * insert the given fixed spacing between every adjacent node. If it is given
+     * as a function, then that function will be passed two nodes, and should
+     * return the minimum allowable spacing between those nodes. If spacing is
+     * not specified, this returns the current spacing, which defaults to 0.
+     */
+    spacing(s: number): this;
+    spacing(
+      f: (a: FlexHierarchy<Datum>, b: FlexHierarchy<Datum>) => number
+    ): this;
+    spacing(): number;
 
     /**
      * Creates a new hierarchy from the data, using the children accessors in
