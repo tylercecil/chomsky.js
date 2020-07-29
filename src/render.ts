@@ -6,10 +6,6 @@ type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
 type SVG = Selection<SVGSVGElement, string, HTMLElement, undefined>;
 type TreeData = FlexHierarchy<Tree>;
 
-// NOTE: We will set em to 1 in the svg coords.That means, if we want the SVG to
-// have a max-size based on the surrounding div, we need to set max-width to
-// viewBox-width * parent.em.
-
 /**
  * Bundles together settings and options used for rendering a tree.
  *
@@ -19,14 +15,27 @@ type TreeData = FlexHierarchy<Tree>;
  * TODO: This should eventually be in its own file, and expanded upon.
  */
 const config = {
-  nodeSize: 0.2,
-  linkWidth: 0.01,
-  margin: {
-    x: 1.5 * 0.2,
-    y: 1.2 * 0.2,
+  nodePad: {
+    x: 1,
+    y: 1.5,
   },
-  maxScale: 150,
+  linkWidth: 0.1,
+  margin: {
+    x: 1,
+    y: 1,
+  },
+  maxScale: 50,
 };
+
+// Flextree has a confusing x/y/top/bottom/left/right scheme. To avoid mistakes,
+// I'm making my own.
+// I need to fork flextree... it's kinda a dead project
+const cx = (d: TreeData) => d.x;
+const cy = (d: TreeData) => d.top + d.ySize / 2;
+const top = (d: TreeData) => d.top;
+const bottom = (d: TreeData) => d.bottom;
+const left = (d: TreeData) => d.left;
+const right = (d: TreeData) => d.right;
 
 /**
  * Renders `tree` into an SVG, and then sets the body of `div` to that SVG.
@@ -40,8 +49,30 @@ const config = {
  * @param {Selection} div `<div>` to be associated with `tree`.
  */
 export function render(tree: Tree, div: Div) {
-  const layout = flextree().nodeSize([1, 1]);
-  const root = layout.hierarchy(tree) as TreeData;
+  // Node Size is determined exclusively by the text contained within the node.
+  // We will treat 1 = 1em in our coordinate system. So the height is the number
+  // of lines of information, while the length the length of the longest line.
+  // This will also use a base padding, defined in `config`.
+  // TODO: I actually want to MAKE the SVGs BEFORE I layout the data, that way I
+  // can calculate true width/height of the text elements.
+  const layout = flextree<Tree>()
+    .spacing(0)
+    .nodeSize((d) => {
+      const lines: string[] = [];
+      if (d.data.nodeType) {
+        lines.push(
+          d.data.nodeType.name + d.data.nodeType.sub + d.data.nodeType.sup
+        );
+      }
+      if (d.data.leaf) {
+        lines.push(d.data.leaf.data);
+      }
+      const width = Math.max(...lines.map((s) => s.length * 0.8));
+      const height = lines.length;
+
+      return [width + config.nodePad.x, height + config.nodePad.y];
+    });
+  const root = layout.hierarchy(tree);
   layout(root);
 
   div.html('');
@@ -64,6 +95,7 @@ export function render(tree: Tree, div: Div) {
  * @return newly created SVG child of `div`.
  */
 function makeSVG(div: Div, root: TreeData) {
+  console.log(div.attr('font-size'));
   const vb = viewBox(root);
   const svg = div
     .append('svg')
@@ -88,10 +120,10 @@ function viewBox(root: TreeData) {
   const max = { x: -Infinity, y: -Infinity };
   const min = { x: Infinity, y: Infinity };
   root.each((d) => {
-    max.x = Math.max(d.x, max.x);
-    max.y = Math.max(d.y, max.y);
-    min.x = Math.min(d.x, min.x);
-    min.y = Math.min(d.y, min.y);
+    max.x = Math.max(right(d), max.x);
+    max.y = Math.max(bottom(d), max.y);
+    min.x = Math.min(left(d), min.x);
+    min.y = Math.min(top(d), min.y);
   });
 
   return [
@@ -106,6 +138,7 @@ function viewBox(root: TreeData) {
  * Attach all nodes from `root` to `svg`'s `<g class="nodes">` child.
  */
 function makeNodes(svg: SVG, root: TreeData) {
+  const textStartY = (d: TreeData) => top(d) + 0.5 + config.nodePad.y / 2;
   svg
     .select('g.nodes')
     .selectAll('g.node')
@@ -113,41 +146,42 @@ function makeNodes(svg: SVG, root: TreeData) {
     .join((enter) => {
       const node = enter.append('g').classed('node', true);
       node
-        .append('ellipse')
-        .attr('cx', (d) => d.x)
-        .attr('cy', (d) => d.y)
-        .attr('ry', config.nodeSize)
-        .attr('rx', config.nodeSize);
+        .append('rect')
+        .attr('x', (d) => left(d))
+        .attr('y', (d) => top(d))
+        .attr('width', (d) => d.xSize)
+        .attr('height', (d) => d.ySize);
       const nodeType = node
         .append('text')
         .text((d) => d.data.nodeType?.name ?? '')
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y)
-        .attr('font-size', config.nodeSize)
+        .attr('x', cx)
+        .attr('y', textStartY)
+        .attr('font-size', 1)
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle');
       nodeType
         .filter((d) => d.data.nodeType?.sub != '')
         .append('tspan')
         .text((d) => d.data.nodeType!.sub)
-        .attr('font-size', config.nodeSize * 0.9)
+        .attr('font-size', 0.9)
         .attr('baseline-shift', 'sub');
       nodeType
         .filter((d) => d.data.nodeType?.sup != '')
         .append('tspan')
         .text((d) => d.data.nodeType!.sup)
-        .attr('font-size', config.nodeSize * 0.9)
+        .attr('font-size', 0.9)
         .attr('baseline-shift', 'super');
 
       node
         .filter((d) => d.data.leaf?.data != null)
         .append('text')
         .text((d) => d.data.leaf!.data)
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y)
+        .attr('x', cx)
+        .attr('y', textStartY)
+        // Implicitly assuming there can be no data without a type...
         .attr('dx', 0)
-        .attr('dy', '1.5em')
-        .attr('font-size', config.nodeSize * 0.9)
+        .attr('dy', '1em')
+        .attr('font-size', 0.9)
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle');
       return node;
@@ -165,10 +199,11 @@ function makeLinks(svg: SVG, root: TreeData) {
     .enter()
     .append('line')
     .classed('link', true)
-    .attr('x1', (d) => d.source.x)
-    .attr('y1', (d) => d.source.y)
-    .attr('x2', (d) => d.target.x)
-    .attr('y2', (d) => d.target.y);
+    // For the link, we ignore the y padding
+    .attr('x1', (d) => cx(d.source as TreeData))
+    .attr('y1', (d) => bottom(d.source as TreeData) - config.nodePad.y / 2)
+    .attr('x2', (d) => cx(d.target as TreeData))
+    .attr('y2', (d) => top(d.target as TreeData) + config.nodePad.y / 2);
 }
 
 /**
@@ -177,7 +212,10 @@ function makeLinks(svg: SVG, root: TreeData) {
  * TODO this style should eventually come from `config`
  */
 function styleTree(svg: SVG) {
-  svg.selectAll('g.nodes g.node ellipse').style('fill', 'white');
+  svg
+    .selectAll('g.nodes g.node rect')
+    .style('stroke-width', 0)
+    .style('opacity', 0);
   svg
     .selectAll('g.links line')
     .style('stroke', 'black')
