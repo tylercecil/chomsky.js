@@ -6,10 +6,6 @@ type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
 type SVG = Selection<SVGSVGElement, string, HTMLElement, undefined>;
 type TreeData = FlexHierarchy<Tree>;
 
-// NOTE: We will set em to 1 in the svg coords.That means, if we want the SVG to
-// have a max-size based on the surrounding div, we need to set max-width to
-// viewBox-width * parent.em.
-
 /**
  * Bundles together settings and options used for rendering a tree.
  *
