@@ -5,30 +5,59 @@
     <style>
     </style>
     <script src="../dist/bundle.js"></script>
-    <script>
-      function run() {
-        const val = chomTree.select('#input textarea').node().value
-        const out = chomTree.select('#output');
-        try {
-          console.log(val);
-          const root = chomTree.parse(val);
-          console.log(root);
-          chomTree.render(root, out);
-        } catch(err) {
-          out.text(err);
-        }
-      }
-    </script>
   </head>
 
   <body>
-    <div id="input">
-      <textarea>[X.X]</textarea>
-      <br>
-      <button id="render" type="button" onclick="run()"> Render </button>
-    </div>
+    <div id="col" style="max-width:600px;">
+      <h1>ChomTree Examples</h1>
 
-    <div id="output" style="max-width: 600px; margin: auto;">
+      <div id="examples">
+      </div>
+
+      <script>
+        function update(exampId) {
+          const div = chomTree.select('#' + exampId);
+          const val = div.select('textarea').node().value;
+          const out = div.select('div');
+          console.log(val);
+          try {
+            const root = chomTree.parse(val);
+            chomTree.render(root, out);
+          } catch(err) {
+            out.text(err);
+          }
+        }
+
+        function makeExample(title, s) {
+          if( typeof makeExample.num == 'undefined' ) {
+            makeExample.num = 0;
+          }
+
+          const name = 'e' + makeExample.num++;
+          const examp = chomTree.select('#examples')
+                .append('div')
+                .attr('id', name);
+          examp.append('h2').html(title);
+          examp.append('textarea')
+            .style('width', '100%')
+            .on('input', () => update(name))
+            .html(s);
+          examp.append('br');
+          examp.append('div');
+
+          update(name);
+        }
+
+        examples = [
+          ['Simple Tree', '[X.X]'],
+          ['Normal Example',
+           '[T [NP.N This] [T /] [VP [V is] [NP [D an] [PP.P example] [N sentence.]]]]'],
+          ['Long Word Example',
+           '[T [NP [D This] [N example]] [VP* has a really big node.]]']
+        ]
+        examples.forEach((e) => makeExample(...e))
+      </script>
+
     </div>
   </body>
 </html>
