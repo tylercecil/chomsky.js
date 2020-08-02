@@ -126,7 +126,7 @@ describe('parse', () => {
      ['[X data]', T('X').data('data')],
      ['[X [] []]', T('X').add(T(), T())],
      ['[X [Y] [Z]]', T('X').add(T('Y'), T('Z'))],
-     ['[X* data]', T('X').data('data').collapse()],
+     ['[X* data]', T('X').add( T().data('data').collapse() )],
      ['[X this_data ^ has./punct* ]',
       T('X').data('this_data ^ has./punct* ')],
      ['[X       data]', T('X').data('data')],
@@ -140,7 +140,7 @@ describe('parse', () => {
           T('Y').add(
             T('Z').data('data'))),
         T())],
-     ['[X*X.X data]', T('X').data('X.X data').collapse()]
+     ['[X*X.X data]', T('X').add( T().data('X.X data').collapse())]
     ]
   )('correctly builds Tree from "%s"', (str, tree) => {
     expect(parse(str)).toEqual(tree.build());

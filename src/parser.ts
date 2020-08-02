@@ -74,7 +74,13 @@ function parse(input: string) {
         case '[':
           head.children = nodeList();
           break;
-        case '*':
+        case '*': {
+          const newHead = Tree();
+          head.children.push(newHead);
+          newHead.leaf = nodeData();
+          head = newHead;
+          break;
+        }
         case '.':
         case '/':
         case '_':
