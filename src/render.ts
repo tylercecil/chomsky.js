@@ -24,16 +24,37 @@ type Hierarchy = FlexHierarchy<TreeData>;
  * TODO: This should eventually be in its own file, and expanded upon.
  */
 const config = {
-  nodePad: {
-    x: 1,
-    y: 2,
+  /**
+   * Individual node padding (padding.x defines left and right padding).
+   */
+  padding: {
+    x: 0.25,
+    y: 0.25,
   },
-  linkWidth: 0.05,
+  /**
+   * Individual node margin (margin.x defines left and right margin).
+   */
   margin: {
+    x: 0.125,
+    y: 1,
+  },
+  /**
+   * Extra space to be placed between lines of text. 0 causes BBoxes to be
+   * touching but non-overlapping.
+   */
+  lineSpacing: 0.2,
+  /**
+   * Stroke width of all figures.
+   */
+  strokeWidth: 0.05,
+  /**
+   * Margin for the entire svg (treeMargin.x defines left and right margin)
+   */
+  treeMargin: {
     x: 1,
     y: 1,
   },
-  maxScale: 50,
+  maxScale: 40,
 };
 
 // Flextree has a confusing x/y/top/bottom/left/right scheme. To avoid mistakes,
@@ -68,8 +89,8 @@ export function render(tree: Tree, div: Div) {
     .spacing(0)
     .nodeSize((d) => {
       return [
-        d.data.size[0] + config.nodePad.x,
-        d.data.size[1] + config.nodePad.y,
+        d.data.size[0] + 2 * (config.padding.x + config.margin.x),
+        d.data.size[1] + 2 * (config.padding.y + config.margin.y),
       ];
     });
   const root = layout.hierarchy(tree as TreeData) as Hierarchy;
@@ -123,7 +144,9 @@ function initNodes(svg: SVG, root: Hierarchy) {
         .text((d) => d.data.leaf!.data)
         // Implicitly assuming there can be no data without a type...
         .attr('dx', 0)
-        .attr('dy', '1em')
+        .attr('dy', (d) => {
+          return nodeType.node()!.getBBox().height + config.lineSpacing;
+        })
         .attr('font-size', 0.9)
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle');
@@ -182,10 +205,10 @@ function viewBox(root: Hierarchy) {
   });
 
   return [
-    min.x - config.margin.x,
-    min.y - config.margin.y,
-    max.x - min.x + 2 * config.margin.x,
-    max.y - min.y + 2 * config.margin.y,
+    min.x - config.treeMargin.x,
+    min.y - config.treeMargin.y,
+    max.x - min.x + 2 * config.treeMargin.x,
+    max.y - min.y + 2 * config.treeMargin.y,
   ];
 }
 
@@ -193,7 +216,8 @@ function viewBox(root: Hierarchy) {
  * Attach all nodes from `root` to `svg`'s `<g class="nodes">` child.
  */
 function makeNodes(svg: SVG, root: Hierarchy) {
-  const textStartY = (d: Hierarchy) => top(d) + 0.5 + config.nodePad.y / 2;
+  const textStartY = (d: Hierarchy) =>
+    top(d) + 0.5 + config.padding.y + config.margin.y;
 
   const node = svg
     .select('g.nodes')
@@ -225,9 +249,9 @@ function makeLinks(svg: SVG, root: Hierarchy) {
     .classed('link', true)
     // For the link, we ignore the y padding
     .attr('x1', (d) => cx(d.source as Hierarchy))
-    .attr('y1', (d) => bottom(d.source as Hierarchy) - config.nodePad.y / 2)
+    .attr('y1', (d) => bottom(d.source as Hierarchy) - config.margin.y)
     .attr('x2', (d) => cx(d.target as Hierarchy))
-    .attr('y2', (d) => top(d.target as Hierarchy) + config.nodePad.y / 2);
+    .attr('y2', (d) => top(d.target as Hierarchy) + config.margin.y);
 }
 
 /**
@@ -239,11 +263,11 @@ function styleTree(svg: SVG) {
   svg
     .selectAll('g.nodes g.node rect')
     .style('fill', 'white')
-    .style('stroke-width', config.linkWidth)
+    .style('stroke-width', config.strokeWidth)
     .style('stroke', 'black')
     .style('opacity', 0);
   svg
     .selectAll('g.links line')
     .style('stroke', 'black')
-    .style('stroke-width', config.linkWidth);
+    .style('stroke-width', config.strokeWidth);
 }
