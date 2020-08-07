@@ -1,5 +1,5 @@
 import { Tree } from './tree';
-import { select, Selection } from 'd3-selection';
+import { select, Selection, BaseType } from 'd3-selection';
 import { flextree, FlexHierarchy } from 'd3-flextree';
 
 type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
@@ -12,6 +12,7 @@ type SVG = Selection<SVGSVGElement, string, HTMLElement, undefined>;
  */
 interface TreeData extends Tree {
   size: [number, number];
+  nodeG: SVGGElement;
 }
 type Hierarchy = FlexHierarchy<TreeData>;
 
@@ -39,10 +40,10 @@ const config = {
     y: 1,
   },
   /**
-   * Extra space to be placed between lines of text. 0 causes BBoxes to be
-   * touching but non-overlapping.
+   * Extra space to be placed between lines of text. 0 causes BBoxes to totally
+   * overlap. Given in em units.
    */
-  lineSpacing: 0.2,
+  lineSpacing: 1.2,
   /**
    * Stroke width of all figures.
    */
@@ -115,10 +116,23 @@ function initNodes(svg: SVG, root: Hierarchy) {
     .join((enter) => {
       const node = enter.append('g').classed('node', true);
 
-      node.append('rect');
+      // Each node attaches its own group
+      node.each((d, i, g) => {
+        d.data.nodeG = select(g[i]).node()!;
+      });
+
+      node
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', 0)
+        .attr('height', 0);
 
       const nodeType = node
+        .filter((d) => d.data.nodeType != null)
         .append('text')
+        .attr('x', 0)
+        .attr('y', 0)
         .classed('nodeType', true)
         .text((d) => d.data.nodeType?.name ?? '')
         .attr('font-size', 1)
@@ -140,19 +154,22 @@ function initNodes(svg: SVG, root: Hierarchy) {
       node
         .filter((d) => d.data.leaf?.data != null)
         .append('text')
+        .attr('x', 0)
+        .attr('y', 0)
         .classed('nodeData', true)
         .text((d) => d.data.leaf!.data)
         // Implicitly assuming there can be no data without a type...
         .attr('dx', 0)
         .attr('dy', (d) => {
-          return nodeType.node()!.getBBox().height + config.lineSpacing;
+          // TODO: Use the BBox up to this point to determine spacing
+          return (d.data.nodeType != null ? config.lineSpacing : 0) + 'em';
         })
         .attr('font-size', 0.9)
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle');
 
       node.each((d, i, g) => {
-        const bb = select(g[i]).node()!.getBBox();
+        const bb = d.data.nodeG.getBBox();
         d.data.size = [bb.width, bb.height];
       });
 
