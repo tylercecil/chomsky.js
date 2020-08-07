@@ -257,11 +257,14 @@ function makeNodes(svg: SVG, root: Hierarchy) {
  * Attach all edges from `root` to `svg`'s `<g class="links">` child.
  */
 function makeLinks(svg: SVG, root: Hierarchy) {
-  svg
+  const enter = svg
     .select('g.links')
     .selectAll('line.link')
     .data(root.links())
-    .enter()
+    .enter();
+
+  enter
+    .filter((d) => !(d.target.data.leaf?.isCollapsed ?? false))
     .append('line')
     .classed('link', true)
     // For the link, we ignore the y padding
@@ -269,6 +272,24 @@ function makeLinks(svg: SVG, root: Hierarchy) {
     .attr('y1', (d) => bottom(d.source as Hierarchy) - config.margin.y)
     .attr('x2', (d) => cx(d.target as Hierarchy))
     .attr('y2', (d) => top(d.target as Hierarchy) + config.margin.y);
+
+  enter
+    .filter((d) => d.target.data.leaf?.isCollapsed ?? false)
+    .append('polygon')
+    .classed('link', true)
+    .attr('points', (d) => {
+      const source = {
+        x: cx(d.source as Hierarchy),
+        y: bottom(d.source as Hierarchy) - config.margin.y,
+      };
+      const targ = {
+        y: top(d.target as Hierarchy) + config.margin.y,
+        left: left(d.target as Hierarchy) + config.margin.x + config.padding.x,
+        right:
+          right(d.target as Hierarchy) - config.margin.x - config.padding.x,
+      };
+      return `${source.x},${source.y} ${targ.left},${targ.y} ${targ.right},${targ.y}`;
+    });
 }
 
 /**
@@ -284,7 +305,8 @@ function styleTree(svg: SVG) {
     .style('stroke', 'black')
     .style('opacity', 0);
   svg
-    .selectAll('g.links line')
+    .selectAll('g.links')
     .style('stroke', 'black')
-    .style('stroke-width', config.strokeWidth);
+    .style('stroke-width', config.strokeWidth)
+    .style('fill-opacity', 0);
 }
