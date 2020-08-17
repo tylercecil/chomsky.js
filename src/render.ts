@@ -1,5 +1,5 @@
 import { Tree } from './tree';
-import { select, Selection, BaseType } from 'd3-selection';
+import { select, Selection } from 'd3-selection';
 import { flextree, FlexHierarchy } from 'd3-flextree';
 
 type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
@@ -46,8 +46,7 @@ const config = {
   lineSpacing: 1.2,
   /**
    * Stroke width of all figures.
-   */
-  strokeWidth: 0.05,
+   */ strokeWidth: 0.05,
   /**
    * Margin for the entire svg (treeMargin.x defines left and right margin)
    */
@@ -58,15 +57,50 @@ const config = {
   maxScale: 40,
 };
 
-// Flextree has a confusing x/y/top/bottom/left/right scheme. To avoid mistakes,
-// I'm making my own.
-// I need to fork flextree... it's kinda a dead project
-const cx = (d: Hierarchy) => d.x;
-const cy = (d: Hierarchy) => d.top + d.ySize / 2;
-const top = (d: Hierarchy) => d.top;
-const bottom = (d: Hierarchy) => d.bottom;
-const left = (d: Hierarchy) => d.left;
-const right = (d: Hierarchy) => d.right;
+/**
+ * `geom` contains a set of functions which are used to comprehend the geometry
+ * of nodes and links.
+ */
+const geom = {
+  /**
+   * Bounding Box after applying margin to `pBox`. This should follow node size.
+   */
+  mBox: {
+    x1: (n: Hierarchy) => n.left,
+    y1: (n: Hierarchy) => n.top,
+    x2: (n: Hierarchy) => n.right,
+    y2: (n: Hierarchy) => n.bottom,
+    width: (n: Hierarchy) => geom.mBox.x2(n) - geom.mBox.x1(n),
+    height: (n: Hierarchy) => geom.mBox.y2(n) - geom.mBox.y1(n),
+  },
+
+  /**
+   * Bounding Box after applying padding to the content, `cBox`. This is the
+   * node size with the margin removed.
+   */
+  pBox: {
+    x1: (n: Hierarchy) => n.left + config.margin.x,
+    y1: (n: Hierarchy) => n.top + config.margin.y,
+    x2: (n: Hierarchy) => n.right - config.margin.x,
+    y2: (n: Hierarchy) => n.bottom - config.margin.y,
+    width: (n: Hierarchy) => geom.pBox.x2(n) - geom.pBox.x1(n),
+    height: (n: Hierarchy) => geom.pBox.y2(n) - geom.pBox.y1(n),
+  },
+
+  /**
+   * Bounding Box for the node content, before padding and margin.
+   */
+  cBox: {
+    x1: (n: Hierarchy) => n.left + config.margin.x + config.padding.x,
+    y1: (n: Hierarchy) => n.top + config.margin.y + config.padding.y,
+    x2: (n: Hierarchy) => n.right - config.margin.x - config.padding.x,
+    y2: (n: Hierarchy) => n.bottom - config.margin.y - config.padding.x,
+    width: (n: Hierarchy) => geom.pBox.x2(n) - geom.pBox.x1(n),
+    height: (n: Hierarchy) => geom.pBox.y2(n) - geom.pBox.y1(n),
+  },
+
+  centerX: (n: Hierarchy) => n.x,
+};
 
 /**
  * Renders `tree` into an SVG, and then sets the body of `div` to that SVG.
@@ -136,7 +170,7 @@ function initNodes(svg: SVG, root: Hierarchy) {
         .classed('nodeType', true)
         .text((d) => d.data.nodeType?.name ?? '')
         .attr('font-size', 1)
-        .attr('dominant-baseline', 'middle')
+        .attr('dominant-baseline', 'hanging')
         .attr('text-anchor', 'middle');
       nodeType
         .filter((d) => d.data.nodeType?.sub != '')
@@ -165,7 +199,7 @@ function initNodes(svg: SVG, root: Hierarchy) {
           return (d.data.nodeType != null ? config.lineSpacing : 0) + 'em';
         })
         .attr('font-size', 0.9)
-        .attr('dominant-baseline', 'middle')
+        .attr('dominant-baseline', 'hanging')
         .attr('text-anchor', 'middle');
 
       node.each((d, i, g) => {
@@ -215,10 +249,10 @@ function viewBox(root: Hierarchy) {
   const max = { x: -Infinity, y: -Infinity };
   const min = { x: Infinity, y: Infinity };
   root.each((d) => {
-    max.x = Math.max(right(d), max.x);
-    max.y = Math.max(bottom(d), max.y);
-    min.x = Math.min(left(d), min.x);
-    min.y = Math.min(top(d), min.y);
+    max.x = Math.max(geom.mBox.x2(d), max.x);
+    max.y = Math.max(geom.mBox.y2(d), max.y);
+    min.x = Math.min(geom.mBox.x1(d), min.x);
+    min.y = Math.min(geom.mBox.y1(d), min.y);
   });
 
   return [
@@ -233,9 +267,6 @@ function viewBox(root: Hierarchy) {
  * Attach all nodes from `root` to `svg`'s `<g class="nodes">` child.
  */
 function makeNodes(svg: SVG, root: Hierarchy) {
-  const textStartY = (d: Hierarchy) =>
-    top(d) + 0.5 + config.padding.y + config.margin.y;
-
   const node = svg
     .select('g.nodes')
     .selectAll('g.node')
@@ -243,14 +274,14 @@ function makeNodes(svg: SVG, root: Hierarchy) {
 
   node
     .select('rect')
-    .attr('x', (d) => left(d))
-    .attr('y', (d) => top(d))
-    .attr('width', (d) => d.xSize)
-    .attr('height', (d) => d.ySize);
+    .attr('x', geom.mBox.x1)
+    .attr('y', geom.mBox.y1)
+    .attr('width', geom.mBox.width)
+    .attr('height', geom.mBox.height);
 
-  node.select('.nodeType').attr('x', cx).attr('y', textStartY);
+  node.select('.nodeType').attr('x', geom.centerX).attr('y', geom.cBox.y1);
 
-  node.select('.nodeData').attr('x', cx).attr('y', textStartY);
+  node.select('.nodeData').attr('x', geom.centerX).attr('y', geom.cBox.y1);
 }
 
 /**
@@ -268,10 +299,10 @@ function makeLinks(svg: SVG, root: Hierarchy) {
     .append('line')
     .classed('link', true)
     // For the link, we ignore the y padding
-    .attr('x1', (d) => cx(d.source as Hierarchy))
-    .attr('y1', (d) => bottom(d.source as Hierarchy) - config.margin.y)
-    .attr('x2', (d) => cx(d.target as Hierarchy))
-    .attr('y2', (d) => top(d.target as Hierarchy) + config.margin.y);
+    .attr('x1', (d) => geom.centerX(d.source as Hierarchy))
+    .attr('y1', (d) => geom.pBox.y2(d.source as Hierarchy))
+    .attr('x2', (d) => geom.centerX(d.target as Hierarchy))
+    .attr('y2', (d) => geom.pBox.y1(d.target as Hierarchy));
 
   enter
     .filter((d) => d.target.data.leaf?.isCollapsed ?? false)
@@ -279,14 +310,13 @@ function makeLinks(svg: SVG, root: Hierarchy) {
     .classed('link', true)
     .attr('points', (d) => {
       const source = {
-        x: cx(d.source as Hierarchy),
-        y: bottom(d.source as Hierarchy) - config.margin.y,
+        x: geom.centerX(d.source as Hierarchy),
+        y: geom.pBox.y2(d.source as Hierarchy),
       };
       const targ = {
-        y: top(d.target as Hierarchy) + config.margin.y,
-        left: left(d.target as Hierarchy) + config.margin.x + config.padding.x,
-        right:
-          right(d.target as Hierarchy) - config.margin.x - config.padding.x,
+        y: geom.pBox.y1(d.target as Hierarchy),
+        left: geom.pBox.x1(d.target as Hierarchy),
+        right: geom.pBox.x2(d.target as Hierarchy),
       };
       return `${source.x},${source.y} ${targ.left},${targ.y} ${targ.right},${targ.y}`;
     });
