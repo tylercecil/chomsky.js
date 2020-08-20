@@ -128,8 +128,10 @@ export function render(tree: Tree, div: Div) {
       ];
     });
   const root = layout.hierarchy(tree as TreeData) as Hierarchy;
-
-  div.html('');
+  const parentEm = div.style('font-size').match(/([0-9]*)px/);
+  if(parentEm) {
+    config.maxScale = parseInt(parentEm[0]);
+  }
   const svg = makeSVG(div);
 
   initNodes(svg, root);
