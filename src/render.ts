@@ -1,5 +1,5 @@
 import { Tree } from './tree';
-import { select, Selection } from 'd3-selection';
+import { Selection } from 'd3-selection';
 import { flextree, FlexHierarchy } from 'd3-flextree';
 
 type Div = Selection<HTMLDivElement, string, HTMLElement, undefined>;
