@@ -12,7 +12,6 @@ type SVG = Selection<SVGSVGElement, string, HTMLElement, undefined>;
  */
 interface TreeData extends Tree {
   size: [number, number];
-  nodeG: SVGGElement;
 }
 type Hierarchy = FlexHierarchy<TreeData>;
 
@@ -150,11 +149,6 @@ function initNodes(svg: SVG, root: Hierarchy) {
     .join((enter) => {
       const node = enter.append('g').classed('node', true);
 
-      // Each node attaches its own group
-      node.each((d, i, g) => {
-        d.data.nodeG = select(g[i]).node()!;
-      });
-
       node
         .append('rect')
         .attr('x', 0)
@@ -202,8 +196,8 @@ function initNodes(svg: SVG, root: Hierarchy) {
         .attr('dominant-baseline', 'hanging')
         .attr('text-anchor', 'middle');
 
-      node.each((d, i, g) => {
-        const bb = d.data.nodeG.getBBox();
+      node.each((d, i, n) => {
+        const bb = n[i].getBBox();
         d.data.size = [bb.width, bb.height];
       });
 
