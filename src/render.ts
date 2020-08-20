@@ -45,14 +45,8 @@ const config = {
   lineSpacing: 1.2,
   /**
    * Stroke width of all figures.
-   */ strokeWidth: 0.05,
-  /**
-   * Margin for the entire svg (treeMargin.x defines left and right margin)
    */
-  treeMargin: {
-    x: 1,
-    y: 1,
-  },
+  strokeWidth: 0.05,
   maxScale: 40,
 };
 
@@ -252,10 +246,10 @@ function viewBox(root: Hierarchy) {
   });
 
   return [
-    min.x - config.treeMargin.x,
-    min.y - config.treeMargin.y,
-    max.x - min.x + 2 * config.treeMargin.x,
-    max.y - min.y + 2 * config.treeMargin.y,
+    min.x,
+    min.y,
+    max.x - min.x,
+    max.y - min.y,
   ];
 }
 
