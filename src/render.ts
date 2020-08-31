@@ -108,14 +108,33 @@ export function render(tree: Tree, div: Div) {
 
           node
             .append('rect')
+            .classed('mBox', true)
             .attr('x', 0)
             .attr('y', 0)
             .attr('width', 0)
             .attr('height', 0)
             .style('fill', 'white')
-            .style('stroke-width', style.strokeWidth)
-            .style('stroke', 'black')
-            .style('opacity', 0.5);
+            .style('stroke-width', style.strokeWidth);
+
+          node
+            .append('rect')
+            .classed('pBox', true)
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', 0)
+            .attr('height', 0)
+            .style('fill', 'white')
+            .style('stroke-width', style.strokeWidth);
+
+          node
+            .append('rect')
+            .classed('cBox', true)
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', 0)
+            .attr('height', 0)
+            .style('fill', 'white')
+            .style('stroke-width', style.strokeWidth);
 
           const nodeType = node
             .filter((d) => d.data.nodeType != null)
@@ -166,11 +185,25 @@ export function render(tree: Tree, div: Div) {
         },
         (update) => {
           update
-            .select('rect')
+            .select('rect.mBox')
             .attr('x', geom.mBox.x1)
             .attr('y', geom.mBox.y1)
             .attr('width', geom.mBox.width)
             .attr('height', geom.mBox.height);
+
+          update
+            .select('rect.pBox')
+            .attr('x', geom.pBox.x1)
+            .attr('y', geom.pBox.y1)
+            .attr('width', geom.pBox.width)
+            .attr('height', geom.pBox.height);
+
+          update
+            .select('rect.cBox')
+            .attr('x', geom.cBox.x1)
+            .attr('y', geom.cBox.y1)
+            .attr('width', geom.cBox.width)
+            .attr('height', geom.cBox.height);
 
           update
             .select('.nodeType')
