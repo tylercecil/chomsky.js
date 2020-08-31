@@ -83,8 +83,8 @@ export function render(tree: Tree, div: Div) {
       y1: (n: Hierarchy) => n.top + spacing.margin.y + spacing.padding.y,
       x2: (n: Hierarchy) => n.right - spacing.margin.x - spacing.padding.x,
       y2: (n: Hierarchy) => n.bottom - spacing.margin.y - spacing.padding.x,
-      width: (n: Hierarchy) => geom.pBox.x2(n) - geom.pBox.x1(n),
-      height: (n: Hierarchy) => geom.pBox.y2(n) - geom.pBox.y1(n),
+      width: (n: Hierarchy) => geom.cBox.x2(n) - geom.cBox.x1(n),
+      height: (n: Hierarchy) => geom.cBox.y2(n) - geom.cBox.y1(n),
     },
 
     centerX: (n: Hierarchy) => n.x,
