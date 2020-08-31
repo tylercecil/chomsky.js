@@ -113,7 +113,6 @@ export function render(tree: Tree, div: Div) {
             .attr('y', 0)
             .attr('width', 0)
             .attr('height', 0)
-            .style('fill', 'white')
             .style('stroke-width', style.strokeWidth);
 
           node
@@ -123,7 +122,6 @@ export function render(tree: Tree, div: Div) {
             .attr('y', 0)
             .attr('width', 0)
             .attr('height', 0)
-            .style('fill', 'white')
             .style('stroke-width', style.strokeWidth);
 
           node
@@ -133,7 +131,6 @@ export function render(tree: Tree, div: Div) {
             .attr('y', 0)
             .attr('width', 0)
             .attr('height', 0)
-            .style('fill', 'white')
             .style('stroke-width', style.strokeWidth);
 
           const nodeType = node
@@ -303,7 +300,6 @@ export function render(tree: Tree, div: Div) {
 
     svg
       .select('g.links')
-      .style('stroke', 'black')
       .style('stroke-width', style.strokeWidth)
       .style('fill-opacity', 0);
   }
