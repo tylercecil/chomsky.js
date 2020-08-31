@@ -43,6 +43,8 @@ const defaultStyle = {
  *
  * @param {Tree} tree Tree to be rendered into SVG.
  * @param {Selection} div `<div>` in which to append the Tree SVG.
+ * @return {Hierachy} Hierarchy is returned, for any future processing the user
+ *   might want to do.
  */
 export function render(tree: Tree, div: Div) {
   // TODO: Eventually these will be merged with a config argument
@@ -94,18 +96,6 @@ export function render(tree: Tree, div: Div) {
       n.data.size[1] + 2 * (spacing.padding.y + spacing.margin.y),
     ],
   };
-
-  const layout = flextree<TreeWithSize>()
-    .spacing(0)
-    .nodeSize(geom.calcApplySpacing);
-  const root = layout.hierarchy(tree as TreeWithSize) as Hierarchy;
-  const svg = makeSVG(div);
-
-  renderNodes(svg, root); // Pre-renders nodes, to calculate size
-  layout(root);
-  sizeSvg(svg, root);
-  renderNodes(svg, root); // Re-renders nodes, once layout is calculated
-  renderLinks(svg, root);
 
   function renderNodes(svg: SVG, root: Hierarchy) {
     svg
@@ -284,4 +274,17 @@ export function render(tree: Tree, div: Div) {
       .style('stroke-width', style.strokeWidth)
       .style('fill-opacity', 0);
   }
+
+  const layout = flextree<TreeWithSize>()
+    .spacing(0)
+    .nodeSize(geom.calcApplySpacing);
+  const root = layout.hierarchy(tree as TreeWithSize) as Hierarchy;
+  const svg = makeSVG(div);
+
+  renderNodes(svg, root); // Pre-renders nodes, to calculate size
+  layout(root);
+  sizeSvg(svg, root);
+  renderNodes(svg, root); // Re-renders nodes, once layout is calculated
+  renderLinks(svg, root);
+  return root;
 }
