@@ -14,14 +14,14 @@ const defaultSpacing = {
    * Individual node padding (always centered).
    */
   padding: {
-    x: 0.25,
+    x: 0.0,
     y: 0.25,
   },
   /**
    * Individual node margin (always centered).
    */
   margin: {
-    x: 0.125,
+    x: 0.75,
     y: 1,
   },
   /**
